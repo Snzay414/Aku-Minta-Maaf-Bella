@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Kamu 💜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* BACKGROUND UTAMA - PAKE FOTO LO */
+        body {
+            background: url('foto bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Overlay biar teks kebaca */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 0;
+        }
+        
+        /* MAIN CONTENT */
+        #mainContent {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 30px 20px 50px;
+            display: none;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        /* POPUP PILIH LAGU */
+        #musicPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .popup-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            padding: 40px 30px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: popIn 0.4s ease;
+        }
+        
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .popup-card h2 {
+            text-align: center;
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .popup-card p {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+        }
+        
+        .music-popup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .music-popup-item {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 20px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .music-popup-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.25);
+            border-color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .music-popup-item.selected {
+            background: rgba(255,255,255,0.35);
+            border: 2px solid white;
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+        
+        .music-popup-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .music-popup-item h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .music-popup-item p {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            margin: 0;
+        }
+        
+        /* FLOATING MUSIC PLAYER */
+        .music-player {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 60px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            z-index: 1000;
+            max-width: 320px;
+            width: auto;
+        }
+        
+        .player-cover {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        
+        .player-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .player-info {
+            flex: 1;
+        }
+        
+        .player-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 3px;
+        }
+        
+        .player-info p {
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .player-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .player-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .player-btn.play {
+            background: rgba(255,255,255,0.3);
+            width: 42px;
+            height: 42px;
+        }
+        
+        /* APOLOGY CARD */
+        .apology-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 40px;
+            padding: 50px 40px;
+            margin: 40px 0 50px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .apology-card h1 {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+        }
+        
+        .heart-icon {
+            font-size: 50px;
+            margin: 20px 0;
+            animation: pulse 1.8s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .message-text {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .signature {
+            color: rgba(255,255,255,0.8);
+            margin-top: 30px;
+        }
+        
+        .signature strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 26px;
+            color: white;
+            font-weight: 400;
+            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+        
+        /* GALLERY CARD */
+        .gallery {
+            margin-top: 60px;
+        }
+        
+        .gallery h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 40px;
+            color: white;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+            font-weight: 300;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .gallery-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        
+        .card-image {
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-card:hover .card-image img {
+            transform: scale(1.05);
+        }
+        
+        .card-content {
+            padding: 20px 15px 25px;
+            text-align: center;
+        }
+        
+        .card-content h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .card-content p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 700px) {
+            .music-popup-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .apology-card h1 {
+                font-size: 36px;
+            }
+            
+            .music-player {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .popup-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- POPUP PILIH LAGU -->
+    <div id="musicPopup">
+        <div class="popup-card">
+            <h2>Pilih Soundtracknya</h2>
+            <p>satu lagu yang mewakili perasaanku</p>
+            
+            <div class="music-popup-grid" id="musicGrid">
+                <!-- Akan diisi JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+        <!-- Floating Music Player -->
+        <div class="music-player" id="musicPlayer">
+            <div class="player-cover" id="playerCover">
+                <img src="" alt="cover">
+            </div>
+            <div class="player-info">
+                <h4 id="playerTitle">-</h4>
+                <p id="playerArtist">-</p>
+            </div>
+            <div class="player-controls">
+                <button class="player-btn" id="playPauseBtn">⏸</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- APOLOGY CARD -->
+            <div class="apology-card">
+                <h1>Aku Minta Maaf</h1>v>
+                <div class="message-text">
+                    <p>Permintaan maaf di bawa ini untuk prempuaan aku bella💐,</p>
+                    <p style="margin: 20px 0;"> Saayaangkuuu Akuu mintaa maaaf darii hatii aku yang paling dalam,aku bener bener minta maaf banget samaa kamuu,Sebenernyaa jugaa akuu nggak mauu nerima tapi akuu jugaa nggak enakan terus kamuuu jugaa nyuruh akuu jugaa sayaangkuuu,akuuu mintaa maaaf bangeet yaa sayaangkuuu kamuu jangaan nghapuss postingan kamuu sorotan kamuu yaah sayaaangkuu padahaal ituu yaaang bikin akuu salting tiaap hariii,akuuu mintaa maaf yaa cantikuu🥺😭🙏🏻.</p>
+                    <p>Aku bikinin Card foto buaat kamuuu sayaaangkuuu biaaar mood kamuu kembalii lagii bagusss yaa sayaangku,btw aku bikin ini gadang xixixi🙏🏻!</p>
+                </div>
+                <div class="signature">
+                    <span>DARI COWOMU,</span>
+                    <strong>UZY GANS</strong>
+                </div>
+            </div>
+
+            <!-- GALLERY CARD -->
+            <div class="gallery">
+                <h2>Kenangan Indah</h2>
+                <div class="gallery-grid" id="galleryGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================
+        // DATA LAGU - 3 LAGU DENGAN FILE FOTO
+        // ==============================================
+        const songs = [
+            {
+                title: "Anugrah",
+                artist: "Sheila On 7",
+                cover: "foto lagu 1.jpg",  // GANTI: file foto lagu 1
+                file: "lagu1.mp3"           // GANTI: file mp3 lagu 1
+            },
+            {
+                title: "Rumah Ke Rumah",
+                artist: "Hindia",
+                cover: "foto lagu 2.jpg",  // GANTI: file foto lagu 2
+                file: "lagu2.mp3"           // GANTI: file mp3 lagu 2
+            },
+            {
+                title: "Terbaik Untukmu",
+                artist: "Tangga-2005",
+                cover: "foto lagu 3.jpg",  // GANTI: file foto lagu 3
+                file: "lagu3.mp3"           // GANTI: file mp3 lagu 3
+            }
+        ];
+
+        // DATA FOTO - 9 FOTO
+        const photoData = [
+            { title: "Mirror In Market", desc: "Liaat kamuu nyoba'make up kaya lucuu tauu gemes isssh" },
+            { title: "Mirror In Market", desc: "Apalagi inii argg lucuu bangeet pas kamuu milih milih mana yang mau kamu cobain xixixi lucuu" },
+            { title: "Try on Cap", desc: "Ceritanya Lagii nyobaa topi cocok apa nggak nie" },
+            { title: "Coffe In Nako", desc: "Ini Day 1 Kita nongki di Nako Biar Uzy tau tempatnya bagaimana" },
+            { title: "Random", desc: "Foto random Mirror Tapii kamuunyaaa terlihaaat ucuuuu" },
+            { title: "Photobox", desc: "Ini Frist kita photobox dan ada whitlist mentamatkan Photobox" },
+            { title: "Dinner Night", desc: "You look beautiful this dinner, my dear. " },
+            { title: "Kamu lagi Mam", desc: "Lucu banget" },
+            { title: "Foto Terbaru", desc: "Semoga banyak foto selanjutnya" }
+        ];
+
+        // ==============================================
+        // STATE
+        // ==============================================
+        let selectedSong = null;
+        let audio = new Audio();
+        let isPlaying = false;
+
+        // ==============================================
+        // RENDER MUSIC POPUP
+        // ==============================================
+        function renderMusicPopup() {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = '';
+
+            songs.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.className = 'music-popup-item';
+                item.setAttribute('data-index', index);
+
+                // Fallback kalo foto gak ada
+                const imgSrc = song.cover;
+                
+                item.innerHTML = `
+                    <img src="${imgSrc}" alt="${song.title}" onerror="this.src='https://via.placeholder.com/100/9f7aea/ffffff?text=🎵'">
+                    <h3>${song.title}</h3>
+                    <p>${song.artist}</p>
+                `;
+
+                item.addEventListener('click', () => selectSong(song, index));
+                grid.appendChild(item);
+            });
+        }
+
+        // ==============================================
+        // SELECT SONG (PILIH 1, LANGSUNG MULAI)
+        // ==============================================
+        function selectSong(song, index) {
+            // Hapus selected dari semua item
+            document.querySelectorAll('.music-popup-item').forEach(i => i.classList.remove('selected'));
+            
+            // Add selected ke item yang dipilih
+            const selectedItem = document.querySelector(`.music-popup-item[data-index="${index}"]`);
+            selectedItem.classList.add('selected');
+            
+            // Simpan lagu yang dipilih
+            selectedSong = song;
+            
+            // Delay sedikit biar keliatan selectednya
+            setTimeout(() => {
+                // Sembunyikan popup
+                document.getElementById('musicPopup').style.display = 'none';
+                
+                // Tampilkan main content
+                document.getElementById('mainContent').style.display = 'block';
+                
+                // Init music player
+                initMusicPlayer(song);
+            }, 300);
+        }
+
+        // ==============================================
+        // INIT MUSIC PLAYER
+        // ==============================================
+        function initMusicPlayer(song) {
+            const playBtn = document.getElementById('playPauseBtn');
+            const coverImg = document.querySelector('#playerCover img');
+            
+            // Update player UI
+            coverImg.src = song.cover;
+            coverImg.onerror = () => {
+                coverImg.src = 'https://via.placeholder.com/45/9f7aea/ffffff?text=🎵';
+            };
+            
+            document.getElementById('playerTitle').textContent = song.title;
+            document.getElementById('playerArtist').textContent = song.artist;
+            
+            // Setup audio
+            audio.src = song.file;
+            audio.load();
+            
+            // Auto play
+            audio.play().then(() => {
+                isPlaying = true;
+                playBtn.innerHTML = '⏸';
+            }).catch(() => {
+                isPlaying = false;
+                playBtn.innerHTML = '▶';
+                console.log('Klik play untuk mulai lagu');
+            });
+            
+            // Audio ended
+            audio.addEventListener('ended', () => {
+                isPlaying = false;
+                playBtn.innerHTML = '▶';
+            });
+        }
+
+        // ==============================================
+        // PLAYER CONTROL
+        // ==============================================
+        document.getElementById('playPauseBtn')?.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                document.getElementById('playPauseBtn').innerHTML = '▶';
+            } else {
+                audio.play();
+                isPlaying = true;
+                document.getElementById('playPauseBtn').innerHTML = '⏸';
+            }
+        });
+
+        // ==============================================
+        // RENDER GALLERY CARD
+        // ==============================================
+        function renderGallery() {
+            const gallery = document.getElementById('galleryGrid');
+            gallery.innerHTML = '';
+
+            for (let i = 1; i <= 9; i++) {
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                
+                const data = photoData[i-1];
+                
+                // Coba load foto lokal, fallback ke placeholder
+                const imgSrc = `foto${i}.jpg`;
+                
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${imgSrc}" alt="Kenangan ${i}" onerror="this.src='https://via.placeholder.com/400/9f7aea/ffffff?text=Kenangan+${i}'">
+                    </div>
+                    <div class="card-content">
+                        <h3>${data.title}</h3>
+                        <p>${data.desc}</p>
+                    </div>
+                `;
+                
+                gallery.appendChild(card);
+            }
+        }
+
+        // ==============================================
+        // GANTI NAMA LO
+        // ==============================================
+        // Ganti "UZY GANS" dengan nama lo
+        document.querySelector('.signature strong').textContent = 'UZY GANS';
+
+        // ==============================================
+        // INIT
+        // ==============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMusicPopup();
+            renderGallery();
+        });
+    </script>
+</body>
+</html>
